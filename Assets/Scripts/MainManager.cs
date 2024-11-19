@@ -9,9 +9,10 @@ public class MainManager : MonoBehaviour
     public Brick BrickPrefab;
     public int LineCount = 6;
     public Rigidbody Ball;
-
+    public Text BestScore;
     public Text ScoreText;
     public GameObject GameOverText;
+    public GameObject NewHighscoreText;
     
     private bool m_Started = false;
     private int m_Points;
@@ -22,6 +23,8 @@ public class MainManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        BestScore.text = DataStorage.getInstance().GetBestScoreText();
+
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -32,7 +35,7 @@ public class MainManager : MonoBehaviour
             {
                 Vector3 position = new Vector3(-1.5f + step * x, 2.5f + i * 0.3f, 0);
                 var brick = Instantiate(BrickPrefab, position, Quaternion.identity);
-                brick.PointValue = pointCountArray[i];
+                brick.PointValue = pointCountArray[i] * 1000;
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
@@ -71,6 +74,12 @@ public class MainManager : MonoBehaviour
     public void GameOver()
     {
         m_GameOver = true;
-        GameOverText.SetActive(true);
+        string hsString = DataStorage.getInstance().AddScore(m_Points);
+        if (hsString != null) {
+            NewHighscoreText.SetActive(true);
+            NewHighscoreText.GetComponent<Text>().text = "New Highscore!\n" + hsString + "\n Space to continue.";
+        } else {
+            GameOverText.SetActive(true);
+        }
     }
 }
